@@ -1,0 +1,702 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan & Mortgage Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 550px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #6d28d9;
+      margin-bottom: 8px;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 25px;
+      font-size: 0.9rem;
+    }
+
+    .loan-types {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .loan-type-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .loan-type-btn:hover {
+      border-color: #7c3aed;
+    }
+
+    .loan-type-btn.active {
+      background: #7c3aed;
+      border-color: #7c3aed;
+      color: white;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-prefix, .input-suffix {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .input-prefix {
+      left: 14px;
+    }
+
+    .input-suffix {
+      right: 14px;
+    }
+
+    .number-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .number-input:focus {
+      outline: none;
+      border-color: #7c3aed;
+    }
+
+    .number-input.has-prefix {
+      padding-left: 30px;
+    }
+
+    .number-input.has-suffix {
+      padding-right: 60px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .results {
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      border-radius: 16px;
+      padding: 25px;
+      margin-top: 20px;
+      color: white;
+    }
+
+    .monthly-payment {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .payment-label {
+      font-size: 0.9rem;
+      opacity: 0.85;
+      margin-bottom: 5px;
+    }
+
+    .payment-value {
+      font-size: 3rem;
+      font-weight: 700;
+    }
+
+    .payment-period {
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .result-item {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .result-item-label {
+      font-size: 0.75rem;
+      opacity: 0.75;
+      margin-bottom: 4px;
+    }
+
+    .result-item-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .breakdown-visual {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .breakdown-bar {
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .bar-principal {
+      background: rgba(255,255,255,0.8);
+      transition: width 0.3s;
+    }
+
+    .bar-interest {
+      background: rgba(255,255,255,0.3);
+      transition: width 0.3s;
+    }
+
+    .breakdown-legend {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      font-size: 0.8rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .amortization-section {
+      margin-top: 25px;
+      padding-top: 25px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .amortization-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .amortization-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .toggle-btn {
+      padding: 6px 12px;
+      background: #f1f5f9;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .amortization-table {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .amortization-table.show {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      padding: 10px;
+      text-align: left;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .year-row {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    .lang-toggle {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.9);
+      border: 2px solid #7c3aed;
+      border-radius: 20px;
+      color: #7c3aed;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+
+    .lang-toggle:hover {
+      background: #7c3aed;
+      color: white;
+    }
+
+    @media (max-width: 500px) {
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .payment-value {
+        font-size: 2.5rem;
+      }
+
+      .loan-types {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="lang-toggle" onclick="switchLanguage()" id="langToggle">中文</button>
+
+  <div class="container">
+    <h1 data-i18n="title">🏠 Loan Calculator</h1>
+    <p class="subtitle" data-i18n="subtitle">Calculate monthly payments and see amortization</p>
+
+    <div class="loan-types">
+      <button class="loan-type-btn active" data-type="mortgage" data-i18n="loanTypeMortgage" onclick="selectLoanType('mortgage')">Mortgage</button>
+      <button class="loan-type-btn" data-type="auto" data-i18n="loanTypeAuto" onclick="selectLoanType('auto')">Auto Loan</button>
+      <button class="loan-type-btn" data-type="personal" data-i18n="loanTypePersonal" onclick="selectLoanType('personal')">Personal</button>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label" data-i18n="loanAmount">Loan Amount</label>
+      <div class="input-wrapper">
+        <span class="input-prefix">$</span>
+        <input type="number" class="number-input has-prefix" id="loanAmount" value="300000" min="0" step="1000">
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label class="input-label" data-i18n="interestRate">Interest Rate</label>
+        <div class="input-wrapper">
+          <input type="number" class="number-input has-suffix" id="interestRate" value="6.5" min="0" max="30" step="0.1">
+          <span class="input-suffix">%</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label" data-i18n="loanTerm">Loan Term</label>
+        <div class="input-wrapper">
+          <input type="number" class="number-input has-suffix" id="loanTerm" value="30" min="1" max="50">
+          <span class="input-suffix" data-i18n="years">years</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-group" id="downPaymentGroup">
+      <label class="input-label" data-i18n="downPayment">Down Payment (optional)</label>
+      <div class="input-wrapper">
+        <span class="input-prefix">$</span>
+        <input type="number" class="number-input has-prefix" id="downPayment" value="60000" min="0" step="1000">
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="monthly-payment">
+        <div class="payment-label" data-i18n="monthlyPayment">Monthly Payment</div>
+        <div class="payment-value" id="monthlyPayment">$0</div>
+        <div class="payment-period"><span data-i18n="forMonths">for</span> <span id="paymentMonths">360</span> <span data-i18n="months">months</span></div>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="result-item-label" data-i18n="totalPrincipal">Total Principal</div>
+          <div class="result-item-value" id="totalPrincipal">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label" data-i18n="totalInterest">Total Interest</div>
+          <div class="result-item-value" id="totalInterest">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label" data-i18n="totalCost">Total Cost</div>
+          <div class="result-item-value" id="totalCost">$0</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label" data-i18n="payoffDate">Payoff Date</div>
+          <div class="result-item-value" id="payoffDate">-</div>
+        </div>
+      </div>
+
+      <div class="breakdown-visual">
+        <div class="breakdown-bar">
+          <div class="bar-principal" id="barPrincipal" style="width: 50%;"></div>
+          <div class="bar-interest" id="barInterest" style="width: 50%;"></div>
+        </div>
+        <div class="breakdown-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background: rgba(255,255,255,0.8);"></div>
+            <span data-i18n="principal">Principal</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: rgba(255,255,255,0.3);"></div>
+            <span data-i18n="interest">Interest</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="amortization-section">
+      <div class="amortization-header">
+        <span class="amortization-title" data-i18n="amortizationSchedule">Amortization Schedule</span>
+        <button class="toggle-btn" onclick="toggleAmortization()"><span data-i18n="showDetails">Show Details</span></button>
+      </div>
+      <div class="amortization-table" id="amortizationTable">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="year">Year</th>
+              <th data-i18n="principal">Principal</th>
+              <th data-i18n="interest">Interest</th>
+              <th data-i18n="balance">Balance</th>
+            </tr>
+          </thead>
+          <tbody id="amortizationBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentLoanType = 'mortgage';
+    let currentLanguage = 'en';
+
+    const translations = {
+      en: {
+        title: '🏠 Loan Calculator',
+        subtitle: 'Calculate monthly payments and see amortization',
+        loanTypeMortgage: 'Mortgage',
+        loanTypeAuto: 'Auto Loan',
+        loanTypePersonal: 'Personal',
+        loanAmount: 'Loan Amount',
+        interestRate: 'Interest Rate',
+        loanTerm: 'Loan Term',
+        years: 'years',
+        downPayment: 'Down Payment (optional)',
+        monthlyPayment: 'Monthly Payment',
+        forMonths: 'for',
+        months: 'months',
+        totalPrincipal: 'Total Principal',
+        totalInterest: 'Total Interest',
+        totalCost: 'Total Cost',
+        payoffDate: 'Payoff Date',
+        principal: 'Principal',
+        interest: 'Interest',
+        amortizationSchedule: 'Amortization Schedule',
+        showDetails: 'Show Details',
+        hideDetails: 'Hide Details',
+        year: 'Year',
+        balance: 'Balance',
+        documentTitle: 'Loan & Mortgage Calculator'
+      },
+      'zh-Hant': {
+        title: '🏠 貸款計算機',
+        subtitle: '計算每月還款並查看攤還表',
+        loanTypeMortgage: '房貸',
+        loanTypeAuto: '車貸',
+        loanTypePersonal: '信用貸款',
+        loanAmount: '貸款金額',
+        interestRate: '年利率',
+        loanTerm: '貸款期限',
+        years: '年',
+        downPayment: '頭期款（選填）',
+        monthlyPayment: '每月還款',
+        forMonths: '共',
+        months: '個月',
+        totalPrincipal: '本金總額',
+        totalInterest: '利息總額',
+        totalCost: '還款總額',
+        payoffDate: '還清日期',
+        principal: '本金',
+        interest: '利息',
+        amortizationSchedule: '攤還明細表',
+        showDetails: '顯示明細',
+        hideDetails: '隱藏明細',
+        year: '年度',
+        balance: '餘額',
+        documentTitle: '貸款計算機'
+      }
+    };
+
+    const defaultValues = {
+      mortgage: { amount: 300000, rate: 6.5, term: 30, down: 60000 },
+      auto: { amount: 35000, rate: 7.0, term: 5, down: 5000 },
+      personal: { amount: 15000, rate: 10.0, term: 3, down: 0 }
+    };
+
+    function getDefaultLanguage() {
+      const saved = localStorage.getItem('preferredLanguage');
+      if (saved) return saved;
+
+      const browserLang = navigator.language || navigator.languages?.[0] || 'en';
+      return browserLang.toLowerCase().startsWith('zh') ? 'zh-Hant' : 'en';
+    }
+
+    function switchLanguage() {
+      currentLanguage = currentLanguage === 'en' ? 'zh-Hant' : 'en';
+
+      // Save preference to localStorage
+      localStorage.setItem('preferredLanguage', currentLanguage);
+
+      // Update all translatable elements
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[currentLanguage][key]) {
+          element.textContent = translations[currentLanguage][key];
+        }
+      });
+
+      // Update document title
+      document.title = translations[currentLanguage].documentTitle;
+
+      // Update language toggle button
+      document.getElementById('langToggle').textContent = currentLanguage === 'en' ? '中文' : 'English';
+
+      // Regenerate amortization table with new language
+      const table = document.getElementById('amortizationTable');
+      if (table.classList.contains('show')) {
+        calculate();
+      }
+    }
+
+    function loadSavedLanguage() {
+      currentLanguage = getDefaultLanguage();
+      if (currentLanguage !== 'en') {
+        switchLanguage();
+      }
+    }
+
+    function selectLoanType(type) {
+      currentLoanType = type;
+
+      document.querySelectorAll('.loan-type-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+      });
+
+      // Show/hide down payment for different loan types
+      document.getElementById('downPaymentGroup').style.display =
+        type === 'personal' ? 'none' : 'block';
+
+      // Set default values
+      const defaults = defaultValues[type];
+      document.getElementById('loanAmount').value = defaults.amount;
+      document.getElementById('interestRate').value = defaults.rate;
+      document.getElementById('loanTerm').value = defaults.term;
+      document.getElementById('downPayment').value = defaults.down;
+
+      calculate();
+    }
+
+    function formatCurrency(amount) {
+      return '$' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+
+    function calculate() {
+      const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+      const downPayment = currentLoanType === 'personal' ? 0 :
+        (parseFloat(document.getElementById('downPayment').value) || 0);
+      const interestRate = parseFloat(document.getElementById('interestRate').value) / 100 || 0;
+      const loanTermYears = parseInt(document.getElementById('loanTerm').value) || 1;
+
+      const principal = Math.max(0, loanAmount - downPayment);
+      const monthlyRate = interestRate / 12;
+      const numberOfPayments = loanTermYears * 12;
+
+      // Calculate monthly payment using amortization formula
+      let monthlyPayment;
+      if (monthlyRate === 0) {
+        monthlyPayment = principal / numberOfPayments;
+      } else {
+        monthlyPayment = principal *
+          (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
+          (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+      }
+
+      const totalCost = monthlyPayment * numberOfPayments;
+      const totalInterest = totalCost - principal;
+
+      // Update display
+      document.getElementById('monthlyPayment').textContent = formatCurrency(monthlyPayment);
+      document.getElementById('paymentMonths').textContent = numberOfPayments;
+      document.getElementById('totalPrincipal').textContent = formatCurrency(principal);
+      document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+      document.getElementById('totalCost').textContent = formatCurrency(totalCost);
+
+      // Calculate payoff date
+      const payoffDate = new Date();
+      payoffDate.setMonth(payoffDate.getMonth() + numberOfPayments);
+      document.getElementById('payoffDate').textContent =
+        payoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+      // Update breakdown bar
+      const principalPercent = (principal / totalCost) * 100;
+      const interestPercent = (totalInterest / totalCost) * 100;
+      document.getElementById('barPrincipal').style.width = principalPercent + '%';
+      document.getElementById('barInterest').style.width = interestPercent + '%';
+
+      // Generate amortization schedule
+      generateAmortization(principal, monthlyRate, monthlyPayment, loanTermYears);
+    }
+
+    function generateAmortization(principal, monthlyRate, monthlyPayment, years) {
+      const tbody = document.getElementById('amortizationBody');
+      tbody.innerHTML = '';
+
+      let balance = principal;
+      let yearlyPrincipal = 0;
+      let yearlyInterest = 0;
+
+      for (let month = 1; month <= years * 12; month++) {
+        const interestPayment = balance * monthlyRate;
+        const principalPayment = monthlyPayment - interestPayment;
+        balance -= principalPayment;
+
+        yearlyPrincipal += principalPayment;
+        yearlyInterest += interestPayment;
+
+        // Add yearly summary
+        if (month % 12 === 0) {
+          const year = month / 12;
+          const row = document.createElement('tr');
+          row.className = 'year-row';
+          const yearLabel = currentLanguage === 'en' ? `Year ${year}` : `${translations[currentLanguage].year} ${year}`;
+          row.innerHTML = `
+            <td>${yearLabel}</td>
+            <td>${formatCurrency(yearlyPrincipal)}</td>
+            <td>${formatCurrency(yearlyInterest)}</td>
+            <td>${formatCurrency(Math.max(0, balance))}</td>
+          `;
+          tbody.appendChild(row);
+
+          yearlyPrincipal = 0;
+          yearlyInterest = 0;
+        }
+      }
+    }
+
+    function toggleAmortization() {
+      const table = document.getElementById('amortizationTable');
+      const btn = document.querySelector('.toggle-btn');
+      const isShowing = table.classList.toggle('show');
+      const btnText = btn.querySelector('[data-i18n]');
+      if (btnText) {
+        btnText.textContent = isShowing ? translations[currentLanguage].hideDetails : translations[currentLanguage].showDetails;
+      }
+    }
+
+    // Auto-calculate on input change
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+
+    // Load saved language and perform initial calculation
+    loadSavedLanguage();
+    calculate();
+  </script>
+</body>
+</html>
